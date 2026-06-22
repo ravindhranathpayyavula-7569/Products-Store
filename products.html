@@ -1,0 +1,118 @@
+<html>
+  <head>
+    <title>Products</title>
+    <style>
+      #result {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        background-color: rgb(135, 200, 222);
+        padding: 10px;
+      }
+      .result1 {
+        border: 2px solid black;
+        padding: 10px;
+        background: #fff;
+        border-radius: 5px;
+      }
+      .des {
+        width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .res img {
+        width: 150px;
+        height: auto;
+      }
+      .price {
+        font-weight: bold;
+        color: green;
+        margin-top: 5px;
+      }
+    </style>
+    <script>
+      let allProducts = []; 
+
+      async function fetchProducts(category = "") {
+        try {
+          let url = category
+            ? `https://dummyjson.com/products/category/${category}`
+            : "https://dummyjson.com/products?limit=0";
+          let response = await fetch(url);
+          let data = await response.json();
+          allProducts = data.products;
+          displayProducts(allProducts);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      function displayProducts(products) {
+        const result = document.getElementById("result");
+        result.innerHTML = ""; 
+        products.forEach((x) => {
+          const template = document.getElementById("productsTemplate");
+          const clone = template.content.cloneNode(true);
+
+          clone.querySelector(".title").textContent = x.title;
+          clone.querySelector(".id").textContent = "ID: " + x.id;
+          clone.querySelector(".des").textContent = x.description;
+          clone.querySelector(".res").innerHTML = `<img src="${x.images[0]}" alt="${x.title}">`;
+          clone.querySelector(".price").textContent = "Price: $" + x.price;
+
+          result.appendChild(clone);
+        });
+      }
+
+      function searchProduct() {
+        const query = document.getElementById("searchBox").value.toLowerCase();
+        const filtered = allProducts.filter((p) =>
+          p.title.toLowerCase().includes(query)
+        );
+        displayProducts(filtered);
+      }
+
+      function changeCategory() {
+        const category = document.getElementById("categorySelect").value;
+        fetchProducts(category);
+      }
+
+      window.onload = () => fetchProducts();
+    </script>
+  </head>
+  <body>
+    <div style="margin:10px; text-align:center;">
+      <h3>Product Store</h3>
+      <input
+        type="text"
+        id="searchBox"
+        placeholder="Type product name..."
+        onkeyup="searchProduct()"
+      />
+      <br /><br />
+      <!-- Category Dropdown -->
+      <select id="categorySelect" onchange="changeCategory()">
+        <option value="">All Products</option>
+        <option value="smartphones">Smartphones</option>
+        <option value="laptops">Laptops</option>
+        <option value="fragrances">Fragrances</option>
+        <option value="groceries">Groceries</option>
+      </select>
+    </div>
+
+    <div class="products">
+      <template id="productsTemplate">
+        <div class="result1">
+          <h1 class="title" align="center"></h1>
+          <p class="id" align="center"></p>
+          <p class="des" align="center"></p>
+          <div class="res" align="center"></div>
+          <p class="price" align="center"></p>
+        </div>
+      </template>
+    </div>
+
+    <div id="result"></div>
+  </body>
+</html>
